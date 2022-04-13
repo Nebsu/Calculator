@@ -2,45 +2,60 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-#include <unbounded_int.h>
+#include "unbounded_int.h"
 
-int is_int(const char *e) {
-    if (e=="" || e=="-") return 0;
-    for (size_t i=0; i<strlen(e); i++) {
-        if (i==0 && e[i]=='-') continue;
-        if (e[i]!='0' || e[i]!='1' || e[i]!='2' || e[i]!='3' || e[i]!='4' || 
-            e[i]!='5' || e[i]!='6' || e[i]!='7' || e[i]!='8' || e[i]!='9')
-            return 0;
+unbounded_int ll2unbounded_int(long long i) {
+    // Cas avec une entrée nulle
+    if (i==0) {
+        chiffre ch = {
+            .suivant = NULL,
+            .c = '0',
+            .precedent = NULL
+        };
+        unbounded_int zero = {
+            .signe =  '+',
+            .len = 0,
+            .premier = &ch,
+            .dernier = &ch
+        };
+        return zero;
     }
-    return 1;
-}
-
-unbounded_int string2unbounded_int(const char *e) {
-    unbounded_int res;
-    if (is_int(e)==0) {
-        res.signe = '*';
-        res.len = 0;
-        res.premier = NULL;
-        res.dernier = NULL;
-    } else {
-        res.signe = (e[0]=='-')? '-' : '+';
-        res.len = (e[0]=='-')? strlen(e)-1 : strlen(e);
-        size_t a = (e[0]=='-')? 1 : 0;
-        for (size_t i=a; i<res.len; i++) {
-            res.premier->c = e[i];
-        }
-        for (size_t i=res.len-1; i>=a; i--) {
-            res.dernier->c = e[i];
-        }
-    }
+    // On commence par le chiffre des unités :
+    chiffre *fin = NULL;
+    size_t length = 1;
+    int puissance = 10;
+    chiffre *ptr = fin->precedent;
+    chiffre *prems = fin->precedent;
+    chiffre *derch = fin->precedent;
+while (i%puissance!=i);
+    unbounded_int res = {
+        .signe = (i>=0)? '+' : '-',
+        .len = length,
+        .premier = prems,
+        .dernier = derch
+    };
     return res;
 }
 
-void print_unbounded_int(unbounded_int u) {
-    while (u.premier<=u.dernier) {
-        char chiffre = u.premier->c;
-        printf("%c", chiffre);
-        u.premier++;
+void print_unbounded_int(unbounded_int *u) {
+    chiffre *ptr = u->premier;
+    while (ptr!=NULL) {
+        char ch = ptr->c;
+        printf("%c", ch);
+        ptr = ptr->suivant;
     }
     printf("\n");
+}
+
+int main() {
+    long long e0 = 0;
+    long long e1 = 1878452;
+    long long e2 = -174;
+    printf("Entree = %lli\nSortie = ", e0);
+    unbounded_int s0 = ll2unbounded_int(e0);
+    print_unbounded_int(&s0);
+    printf("Entree = %lli\nSortie = ", e1);
+    unbounded_int s1 = ll2unbounded_int(e1);
+    print_unbounded_int(&s1);
+    return 0;
 }

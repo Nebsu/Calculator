@@ -1,0 +1,17 @@
+# depslib dependency file v1.0
+1649849363 source:c:\users\kyan\onedrive\universite\l2s2\lc4\project_c\unbounded_int.c
+	<stdio.h>
+	<stdlib.h>
+	<assert.h>
+	<string.h>
+	"unbounded_int.h"
+
+1649848855 c:\users\kyan\onedrive\universite\l2s2\lc4\project_c\unbounded_int.h
+	<stdio.h>
+	<stdlib.h>
+
+1649849369 source:c:\users\kyan\onedrive\universite\l2s2\lc4\project_c\test_unbounded.c
+
+1649848734 c:\users\kyan\onedrive\universite\l2s2\lc4\project_c\unbounded_int.c
+	"unbounded_int.h"
+
