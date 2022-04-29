@@ -1,6 +1,2 @@
-        // while (res.dernier -> suivant != NULL){
-        //     res.dernier = res.dernier -> suivant;
-        // }
-        // while (a2.dernier -> suivant != NULL){
-        //     a2.dernier = a2.dernier -> suivant;
-        // }
+
+    unbounded_int b = string2unbounded_int("-8415");

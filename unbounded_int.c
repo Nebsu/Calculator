@@ -88,10 +88,31 @@ unbounded_int string2unbounded_int(const char *e){
     return res;
 }
 
+unbounded_int ll2unbounded_int(long long i) {
+    unbounded_int res;
+    if (i==0) {
+        return init_result(1);
+    } else {
+        res.signe = (i>=0)? '+' : '-';
+        res.len = 0;
+        res.premier = NULL;
+        res.dernier = NULL;
+        i = abs(i);
+        while (i > 0){
+            res = insert_chiffre_fin(res, i % 10 + '0');
+            i /= 10;
+        }
+    }
+    return res;
+}
+
 char *unbounded_int2string(unbounded_int i){
     char* res = malloc(sizeof(char)*i.len+1);
     int mem = 1;
     res[0] = i.signe;
+    if(i.len == 1){
+        res[2] = NULL;
+    }
     while (i.premier!= NULL) {
         res[mem] = i.premier -> c;
         i.premier = i.premier -> suivant;
@@ -236,21 +257,27 @@ unbounded_int unbounded_int_somme(unbounded_int a, unbounded_int b){
         res = unbounded_int_somme_positif(a, b);
         res.signe = '-';
     }else if (a.signe == '+' && b.signe == '-'){
-        if(unbounded_int_cmp_int(a, b) == -1){
+        b.signe = '+';
+        if(unbounded_int_cmp_int(a, b) == 0){
+            return init_result(1);
+        }else if(unbounded_int_cmp_int(a, b) == -1){
             res = unbounded_int_difference_positif(b, a);
             res.signe = '-';
         }else{
             res = unbounded_int_difference_positif(a, b);
         }
     }else if (a.signe == '-' && b.signe == '+'){
-        if(unbounded_int_cmp_int(a, b) == 1){
+        a.signe = '+';
+        if(unbounded_int_cmp_int(a, b) == 0){
+            return init_result(1);
+        } else if(unbounded_int_cmp_int(a, b) == 1){
             res = unbounded_int_difference_positif(a, b);
             res.signe = '-';
         }else{
             res = unbounded_int_difference_positif(b, a);
         }
     }
-    return res;
+    return remove_zeros(res);
 }
 
 static unbounded_int remove_zeros(unbounded_int a){
@@ -267,6 +294,9 @@ static unbounded_int remove_zeros(unbounded_int a){
 
 unbounded_int unbounded_int_difference(unbounded_int a, unbounded_int b){
     unbounded_int res = {.signe = '+', .len = 0, .premier = NULL, .dernier = NULL};
+    if(unbounded_int_cmp_int(a,b) == 0){
+        return init_result(1);
+    }
     if(a.signe == '+' && b.signe == '+'){
         if(unbounded_int_cmp_int(a, b) == -1){
             res = unbounded_int_difference_positif(b, a);
@@ -303,6 +333,9 @@ unbounded_int unbounded_int_produit(unbounded_int a, unbounded_int b){
     if(a.signe != b.signe){
         res.signe = '-';
     }
+    if(a.dernier -> c == '0' || b.dernier -> c == '0'){
+        return init_result(1);
+    }
     int r;
     for(int j = 0; j < b.len; j++){
         r = 0;
@@ -332,25 +365,4 @@ unbounded_int unbounded_int_produit(unbounded_int a, unbounded_int b){
     }
     res = remove_zeros(res);
     return res;
-}
-
-int main() { 
-    const char* e = "-101";
-    const char* f = "508";
-    unbounded_int a = string2unbounded_int(e);
-    unbounded_int b = string2unbounded_int(f);
-    int c[2] = {5,2};
-    int d[2] = {5,2};
-    // long long l = 543;
-    // printf("%d",is_int(e));
-    // print_unbounded_int(a);
-    // printf("%s", unbounded_int2string(a));
-    // printf("%d", unbounded_int_cmp_int(b, a));
-    // printf("%d", unbounded_int_cmp_ll(a, l));
-    // print_unbounded_int(unbounded_int_somme_positif(a,b));
-    // print_unbounded_int(unbounded_int_difference_positif(a,b));
-    // print_unbounded_int(unbounded_int_somme(a,b)));
-    // print_unbounded_int(unbounded_int_difference(a,b));
-    print_unbounded_int(unbounded_int_produit(a,b));
-    return 0;
 }

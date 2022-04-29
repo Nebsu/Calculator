@@ -27,6 +27,7 @@ static unbounded_int remove_zeros(unbounded_int a);
 static unbounded_int init_result(size_t a);
 
 unbounded_int string2unbounded_int(const char *e);
+unbounded_int ll2unbounded_int(long long i);
 char *unbounded_int2string(unbounded_int i);
 int unbounded_int_cmp_int(unbounded_int a, unbounded_int b);
 int unbounded_int_cmp_ll(unbounded_int a, long long b);
