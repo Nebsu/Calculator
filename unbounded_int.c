@@ -21,7 +21,7 @@ static int is_int(const char *e) {
 }
 
 static unbounded_int insert_chiffre(unbounded_int nb, const char e) {
-    chiffre *new_chiffre = malloc(sizeof(chiffre*));
+    chiffre *new_chiffre = malloc(sizeof(chiffre));
     if(new_chiffre != NULL){
         new_chiffre -> c = e;
         new_chiffre -> suivant = NULL;
@@ -40,7 +40,7 @@ static unbounded_int insert_chiffre(unbounded_int nb, const char e) {
 }
 
 static unbounded_int insert_chiffre_fin (unbounded_int nb, const char e){
-  chiffre *new_chiffre = malloc(sizeof(chiffre*));
+  chiffre *new_chiffre = malloc(sizeof(chiffre));
   if(new_chiffre != NULL){
         new_chiffre -> c = e;
         new_chiffre -> precedent = NULL;
@@ -229,21 +229,21 @@ static unbounded_int unbounded_int_difference_positif(unbounded_int a, unbounded
 }
 
 unbounded_int unbounded_int_somme(unbounded_int a, unbounded_int b){
-    unbounded_int res;
+    unbounded_int res = {.signe = '+', .len = 0, .premier = NULL, .dernier = NULL};
     if(a.signe == '+' && b.signe == '+'){
         res = unbounded_int_somme_positif(a, b);
     }else if (a.signe == '-' && b.signe == '-'){
         res = unbounded_int_somme_positif(a, b);
         res.signe = '-';
     }else if (a.signe == '+' && b.signe == '-'){
-        if(b.len > a.len){
+        if(unbounded_int_cmp_int(a, b) == -1){
             res = unbounded_int_difference_positif(b, a);
             res.signe = '-';
         }else{
             res = unbounded_int_difference_positif(a, b);
         }
     }else if (a.signe == '-' && b.signe == '+'){
-        if(a.len > b.len){
+        if(unbounded_int_cmp_int(a, b) == 1){
             res = unbounded_int_difference_positif(a, b);
             res.signe = '-';
         }else{
@@ -253,8 +253,20 @@ unbounded_int unbounded_int_somme(unbounded_int a, unbounded_int b){
     return res;
 }
 
+static unbounded_int remove_zeros(unbounded_int a){
+    unbounded_int res = a;
+    if(a.premier -> c != '0'){
+        return a;
+    }else{
+        a.premier = a.premier -> suivant;
+        a.premier -> precedent = NULL;
+        free(res.premier);
+        return remove_zeros(a);
+    }
+}
+
 unbounded_int unbounded_int_difference(unbounded_int a, unbounded_int b){
-    unbounded_int res;
+    unbounded_int res = {.signe = '+', .len = 0, .premier = NULL, .dernier = NULL};
     if(a.signe == '+' && b.signe == '+'){
         if(unbounded_int_cmp_int(a, b) == -1){
             res = unbounded_int_difference_positif(b, a);
@@ -271,21 +283,74 @@ unbounded_int unbounded_int_difference(unbounded_int a, unbounded_int b){
         res = unbounded_int_somme_positif(b, a);
         res.signe = '-';
     }
+    //Vérifier si il y a un 0 au début et l'enlever
+    res = remove_zeros(res);
+    return res;
+}
+static unbounded_int init_result(size_t a){
+    unbounded_int res = {.signe = '+', .len = a, .premier = NULL, .dernier = NULL};
+    int n = 0;
+    while(n < a){
+        res = insert_chiffre(res, '0');
+        n++;
+    }
+    return res;
+}
+
+unbounded_int unbounded_int_produit(unbounded_int a, unbounded_int b){
+    unbounded_int res = init_result(a.len + b.len);
+    unbounded_int a2 = a;
+    if(a.signe != b.signe){
+        res.signe = '-';
+    }
+    int r;
+    for(int j = 0; j < b.len; j++){
+        r = 0;
+        if (b.dernier -> c == '0'){
+            b.dernier = b.dernier -> precedent;
+            res.dernier = res.dernier -> precedent;
+            continue;
+        }
+        for(int i = 0; i < a.len; i++){
+            int v = res.dernier -> c - '0' + (a2.dernier -> c - '0') * (b.dernier -> c - '0') + r;
+            res.dernier ->  c = v % 10 + '0';
+            r = v / 10;
+            res.dernier = res.dernier -> precedent;
+            if(i < a.len-1){
+                a2.dernier = a2.dernier -> precedent;
+            }
+        }
+        res.dernier -> c = r + '0';
+        // retour de res à 0
+        for(int k = 0; k < a.len-1; k++){
+            res.dernier = res.dernier -> suivant;
+        }
+        for(int l = 0; l < a.len-1; l++){
+            a2.dernier = a2.dernier -> suivant;
+        }
+        b.dernier = b.dernier -> precedent;
+    }
+    res = remove_zeros(res);
     return res;
 }
 
 int main() { 
-    const char* e = "-5411";
-    const char* f = "5553";
+    const char* e = "-101";
+    const char* f = "508";
+    unbounded_int a = string2unbounded_int(e);
+    unbounded_int b = string2unbounded_int(f);
+    int c[2] = {5,2};
+    int d[2] = {5,2};
     // long long l = 543;
     // printf("%d",is_int(e));
-    // print_unbounded_int(string2unbounded_int(e));
-    // printf("%s", unbounded_int2string(string2unbounded_int(e)));
-    // printf("%d", unbounded_int_cmp_int(string2unbounded_int(f), string2unbounded_int(e)));
-    // printf("%d", unbounded_int_cmp_ll(string2unbounded_int(e), l));
-    // print_unbounded_int(unbounded_int_somme_positif(string2unbounded_int(e), string2unbounded_int(f)));
-    // print_unbounded_int(unbounded_int_difference_positif(string2unbounded_int(e), string2unbounded_int(f)));
-    // print_unbounded_int(unbounded_int_somme(string2unbounded_int(e), string2unbounded_int(f)));
-    print_unbounded_int(unbounded_int_difference(string2unbounded_int(e), string2unbounded_int(f)));
+    // print_unbounded_int(a);
+    // printf("%s", unbounded_int2string(a));
+    // printf("%d", unbounded_int_cmp_int(b, a));
+    // printf("%d", unbounded_int_cmp_ll(a, l));
+    // print_unbounded_int(unbounded_int_somme_positif(a,b));
+    // print_unbounded_int(unbounded_int_difference_positif(a,b));
+    // print_unbounded_int(unbounded_int_somme(a,b)));
+    // print_unbounded_int(unbounded_int_difference(a,b));
+    print_unbounded_int(unbounded_int_produit(a,b));
     return 0;
 }
