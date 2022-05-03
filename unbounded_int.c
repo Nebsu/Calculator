@@ -60,9 +60,10 @@ static unbounded_int insert_chiffre_fin (unbounded_int nb, const char e){
 
 static void print_unbounded_int(unbounded_int u) {
     printf("%c", u.signe);
-    while (u.premier!= NULL) {
-        printf("%c", u.premier -> c);
-        u.premier = u.premier -> suivant;
+    chiffre *current = u.premier;
+    while (current!= NULL) {
+        printf("%c", current -> c);
+        current = current -> suivant;
     }
     printf("\n");
 }
@@ -107,16 +108,18 @@ unbounded_int ll2unbounded_int(long long i) {
 }
 
 char *unbounded_int2string(unbounded_int i){
-    char* res = malloc(sizeof(char)*i.len+1);
-    int mem = 1;
-    res[0] = i.signe;
+    char* res = malloc(sizeof(char)*i.len);
+    chiffre *current = i.premier;
     if(i.len == 1){
-        res[2] = NULL;
+        res[2] = '\0';
     }
-    while (i.premier!= NULL) {
-        res[mem] = i.premier -> c;
-        i.premier = i.premier -> suivant;
-        mem++;
+    for(int j = 0; j < i.len+1; j++) {
+        if(j == 0){
+            res[j] = i.signe;
+        } else {
+            res[j] = i.premier -> c;
+            current = current -> suivant;
+        }
     }
     return res;
 }
