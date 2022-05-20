@@ -332,7 +332,6 @@ static unbounded_int init_result(size_t a){
 
 unbounded_int unbounded_int_produit(unbounded_int a, unbounded_int b){
     unbounded_int res = init_result(a.len + b.len);
-    unbounded_int a2 = a;
     if(a.signe != b.signe){
         res.signe = '-';
     }
@@ -348,21 +347,20 @@ unbounded_int unbounded_int_produit(unbounded_int a, unbounded_int b){
             continue;
         }
         for(int i = 0; i < a.len; i++){
-            int v = res.dernier -> c - '0' + (a2.dernier -> c - '0') * (b.dernier -> c - '0') + r;
+            int v = res.dernier -> c - '0' + (a.dernier -> c - '0') * (b.dernier -> c - '0') + r;
             res.dernier ->  c = v % 10 + '0';
             r = v / 10;
             res.dernier = res.dernier -> precedent;
             if(i < a.len-1){
-                a2.dernier = a2.dernier -> precedent;
+                a.dernier = a.dernier -> precedent;
             }
         }
         res.dernier -> c = r + '0';
-        // retour de res à 0
         for(int k = 0; k < a.len-1; k++){
             res.dernier = res.dernier -> suivant;
         }
         for(int l = 0; l < a.len-1; l++){
-            a2.dernier = a2.dernier -> suivant;
+            a.dernier = a.dernier -> suivant;
         }
         b.dernier = b.dernier -> precedent;
     }
