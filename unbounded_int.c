@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <math.h>
-
 #include "unbounded_int.h"
 
 static int is_int(const char *e) {
