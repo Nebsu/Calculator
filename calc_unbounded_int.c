@@ -57,69 +57,17 @@ void afficherTab(tableau liste){
     }
 }
 
-// int isAffectation(const char *line) {
-//     int egal = 0;
-//     size_t n = strlen(line);
-//     for (int i=0; i<n; i++) {
-//         if (line[i] == '(' || line[i] == ')') return 0;
-//         if (line[i] =='*' || line[i] =='+' || line[i] =='-') return 0;
-//         if (line[i] =='=') egal += 1;
-//     }
-//     // Verification print :
-//     char *mot = malloc(5 * sizeof(char));
-//     if (mot == NULL) {perror("malloc"); return 0;} 
-//     for (int i=0; i<n-5; i++) {
-//         memmove(mot, line[i], sizeof(mot));
-//         if (strcmp(mot, "print")==0) return 0;
-//     }
-//     // if variable non intialisée return 1 
-//     if (egal > 1) return 0;
-//     return 1;
-// }
+int isAffectation(const char *line) {
+    return 0;
+}
 
-// int isPrint(const char *line) {
-//     int print = 0;
-//     size_t n = strlen(line);
-//     for (int i=0; i<n; i++) {
-//         if (line[i] == '(' || line[i] == ')') return 0;
-//         if (line[i]=='*' || line[i]=='+' || line[i]=='-') return 0;
-//         if (line[i]=='=') return 0;
-//     }
-//     // Verification print :
-//     char *mot = malloc(5 * sizeof(char));
-//     if (mot == NULL) {perror("malloc"); return 0;} 
-//     for (int i=0; i<n-5; i++) {
-//         memmove(mot, line[i], sizeof(mot));
-//         if (strcmp(mot, "print")==0) return 1;
-//     }
-//     return 0;
-// }
+int isPrint(const char *line) {
+    return 0;
+}
 
-// int isOperation(const char *line) {
-//     int egal = 0;
-//     int operation = 0;
-//     size_t n = strlen(line);
-//     for (int i=1; i<n-1; i++) {
-//         if (line[i] == '(' || line[i] == ')') return 0;
-//         // Egal :
-//         if (line[i] =='=') egal +=1;
-//         if (line[i-1] =='=') egal +=1;
-//         if (line[i+1] =='=') egal +=1;
-//         // Operation :
-//         if (line[i]=='*' || line[i]=='+' || line[i]=='-') {
-//             if (line[i+1] == ' ' && line[i-1] == ' ') operation += 1;
-//         }
-//     }
-//     if (egal != 1 || operation != 1) return 0;
-//     // Verification print :
-//     char *mot = malloc(5 * sizeof(char));
-//     if (mot == NULL) {perror("malloc"); return 0;} 
-//     for (int i=0; i<n-5; i++) {
-//         memmove(mot, line[i], sizeof(mot));
-//         if (strcmp(mot, "print")==0) return 0;
-//     }
-//     return 1;
-// }
+int isOperation(const char *line) {
+    return 0;
+}
 
 void printVar(FILE* dest, Texte ligne, variable *list){
     variable *v = contains(list, ligne -> str);
