@@ -99,13 +99,14 @@ int isWord(const char *str) {
 
 int isPrint(Texte ligne, Variable *variables) {
     if (ligne == NULL) return 0;
-    // afficherTexte(ligne);
     char *s1 = ligne->str;
     if (isWord(s1) == 0) return 0;
     if (strcmp(s1, "print") != 0) return 0;
     ligne = ligne->next;
+
     if (ligne == NULL) return 0;
     char *s2 = ligne->str;
+    if (isWord(s2) == 0) return 0;
     return 1;
 }
 
@@ -116,23 +117,25 @@ int isAffectation(Texte ligne, Variable *variables) {
     char *s1 = ligne->str;
     if (isWord(s1) == 0) return 0;
     ligne = ligne->next;
+    
+    if (ligne == NULL) return 0;
     afficherTexte(ligne);
     printf("\n");
-
-    if (ligne == NULL) return 0;
     char *s2 = ligne->str;
     if (strcmp(s2, "=") != 0) return 0;
     ligne = ligne->next;
+
+    if (ligne == NULL) return 0;
     afficherTexte(ligne);
     printf("\n");
-    if (ligne == NULL) return 0;
     char *s3 = ligne->str;
     if (is_int(s3) == 1) return 1;
     if (isWord(s3) == 1) return 1;
     ligne = ligne->next;
+
+    if (ligne == NULL) return 1;
     afficherTexte(ligne);
     printf("\n");
-    if (ligne == NULL) return 1;
     return 0;
 }
 
