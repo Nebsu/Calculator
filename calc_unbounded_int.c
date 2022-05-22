@@ -3,7 +3,6 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
-
 #include "unbounded_int.c"
 
 #define MAX_LENGTH 500
@@ -176,6 +175,7 @@ void printVar(FILE* dest, Texte ligne, Variable *list) {
 }
 
 void affectVar(Texte ligne, Variable *list){
+    // Variable affectée :
     char *var = ligne -> str;
     // On récupère l'affectation
     while(strcmp(ligne -> str, "=") != 0){
@@ -203,6 +203,8 @@ void affectVar(Texte ligne, Variable *list){
 }
 
 void opVar(Texte ligne, Variable *list, char signe){
+    // Variable affectée :
+    char *var = ligne->str;
     // On récupère l'affectation
     while(strcmp(ligne -> str, "=") != 0){
         ligne = ligne -> next;
@@ -242,17 +244,17 @@ void opVar(Texte ligne, Variable *list, char signe){
         unbounded_int somme = unbounded_int_somme(n1, n2);
         printf("somme = ");
         print_unbounded_int(somme);
-        list = addVar(list, ligne -> str, somme);
+        list = addVar(list, var, somme);
     } else if (signe == '-') {
         unbounded_int diff = unbounded_int_difference(n1,n2);
         printf("différence = ");
         print_unbounded_int(diff);
-        list = addVar(list, ligne -> str, diff);
+        list = addVar(list, var, diff);
     } else if (signe == '*') {
         unbounded_int prod = unbounded_int_produit(n1,n2);
         printf("produit = ");
         print_unbounded_int(prod);
-        list = addVar(list, ligne -> str, prod);
+        list = addVar(list, var, prod);
     }
 }
 
