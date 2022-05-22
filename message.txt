@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+
 #include "unbounded_int.c"
 
 #define MAX_LENGTH 500
@@ -21,6 +22,7 @@ typedef struct Variable {
     unbounded_int value;
     struct Variable *next;
 } Variable;
+typedef Variable* ListeVar;
 
 // Fonctions sur les variables :
 
@@ -37,8 +39,8 @@ Variable *contains(Variable *list, char* str) {
 }
 
 // Ajoute la variable ou la modifie s'il existe déja dans la liste :
-Variable *addVar(Variable *list, char* str, unbounded_int val) {
-    Variable *newElem = malloc(sizeof(Variable));
+ListeVar addVar(ListeVar list, char* str, unbounded_int val) {
+    Variable* newElem = malloc(sizeof(Variable));
     assert(newElem != NULL);
     newElem->label = str;
     newElem->next = NULL;
@@ -59,7 +61,7 @@ Variable *addVar(Variable *list, char* str, unbounded_int val) {
     }
 }
 
-void afficherVar(Variable *liste) {
+void afficherVar(ListeVar liste) {
     Variable *tmp = liste;
     while(tmp != NULL){
         printf("-%s = %s-\n", tmp->label, unbounded_int2string(tmp->value));
@@ -257,7 +259,7 @@ void opVar(Texte ligne, Variable *list, char signe){
 
 void readFile(FILE *input, FILE *output) {
     Texte texte = NULL;
-    static Variable * variables = NULL;
+    static ListeVar variables = NULL;
     int i = 0;
     int a = 0, b = 0;
     char *c = malloc(sizeof(char) * MAX_LENGTH);
