@@ -22,7 +22,6 @@ typedef struct Variable {
     unbounded_int value;
     struct Variable *next;
 } Variable;
-typedef Variable* ListeVar;
 
 // Fonctions sur les variables :
 
@@ -39,8 +38,8 @@ Variable *contains(Variable *list, char* str) {
 }
 
 // Ajoute la variable ou la modifie s'il existe déja dans la liste :
-ListeVar addVar(ListeVar list, char* str, unbounded_int val) {
-    Variable* newElem = malloc(sizeof(Variable));
+Variable *addVar(Variable *list, char* str, unbounded_int val) {
+    Variable *newElem = malloc(sizeof(Variable));
     assert(newElem != NULL);
     newElem->label = str;
     newElem->next = NULL;
@@ -61,10 +60,11 @@ ListeVar addVar(ListeVar list, char* str, unbounded_int val) {
     }
 }
 
-void afficherVar(ListeVar liste) {
+void afficherVar(Variable *liste) {
     Variable *tmp = liste;
     while(tmp != NULL){
-        printf("-%s = %s-\n", tmp->label, unbounded_int2string(tmp->value));
+        char *s = unbounded_int2string(tmp->value);
+        printf("-%s = %s-\n", tmp->label, s);
         tmp = tmp->next;
     }
 }
@@ -168,6 +168,7 @@ char isOperation(Texte ligne) {
 void printVar(FILE* dest, Texte ligne, Variable *list) {
     Variable *v = contains(list, ligne -> next -> str);
     if(v != NULL){
+        printf("ok\n");
         char *s = unbounded_int2string(v -> value);
         fprintf(dest, "%s = %s\n" , v -> label, s);
     }else{
@@ -176,8 +177,7 @@ void printVar(FILE* dest, Texte ligne, Variable *list) {
 }
 
 void affectVar(Texte ligne, Variable *list){
-    // Verifie si la Variable est déja définie
-    Variable *v1 = contains(list, ligne -> str);
+    char *var = ligne -> str;
     // On récupère l'affectation
     while(strcmp(ligne -> str, "=") != 0){
         ligne = ligne -> next;
@@ -200,7 +200,7 @@ void affectVar(Texte ligne, Variable *list){
     }
     // Si la Variable n'est pas définie on l'ajoute dans la liste avec l'affectation
     // Sinon on modifie la valeur de la Variable
-    list = addVar(list, ligne -> str, n);
+    list = addVar(list, var, n);
 }
 
 void opVar(Texte ligne, Variable *list, char signe){
