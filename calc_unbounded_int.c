@@ -6,6 +6,7 @@
 #include "unbounded_int.c"
 
 #define MAX_LENGTH 500
+#define MAX_VAR_NUMBER 26
 
 // Structures :
 
@@ -15,53 +16,6 @@ struct Mot {
     struct Mot *next;
 };
 typedef Mot* Texte;
-
-typedef struct Variable {
-    char *label;
-    unbounded_int value;
-    struct Variable *next;
-} Variable;
-typedef Variable* ListeVar;
-
-// Fonctions sur les variables :
-
-ListeVar addVar(ListeVar list, char* str, unbounded_int val) {
-    Variable* newElem = malloc(sizeof(Variable));
-    assert(newElem != NULL);
-    newElem->label = str;
-    newElem->next = NULL;
-    newElem->value = val;
-    if(list == NULL) {
-        return newElem;
-    } else {
-        Variable* temp=list;
-        while(temp->next != NULL) {
-            temp = temp->next;
-        }
-        temp->next = newElem;
-        return list;
-    }
-}
-
-// Retourne la Variable si elle est dans la liste, sinon retourne NULL
-Variable *contains(Variable *list, char* str) {
-    Variable *current = list;
-    while (current != NULL) {
-        if(strcmp(str, current -> label) == 0) {
-            return current;
-        }
-        current = current->next;
-    }
-    return NULL;
-}
-
-void afficherVar(ListeVar liste) {
-    Variable *tmp = liste;
-    while(tmp != NULL){
-        printf("-%s = %s-\n", tmp->label, unbounded_int2string(tmp->value));
-        tmp = tmp->next;
-    }
-}
 
 Texte ajouterFin(Texte liste, char* valeur){
     Mot* newElem = malloc(sizeof(Mot));
@@ -160,19 +114,14 @@ char isOperation(Texte ligne) {
 
 // Fonctions qui effectue les procédures du fichier texte (print, affectation ou opération) :
 
-void printVar(FILE* dest, Texte ligne, Variable *list) {
-    Variable *v = contains(list, ligne -> next -> str);
-    if(v != NULL){
-        fprintf(dest, "%s = %s\n" , v -> label, unbounded_int2string(v -> value));
-    }else{
-        fprintf(dest, "%s = %d\n" , ligne -> next -> str, 0);
-    }
-    // afficherVar(list);
+void printVar(FILE* dest, Texte ligne, unbounded_int *tab) {
+    char *s = ligne->next->str;
+    char c = s[0];
+    fprintf(dest, "%s = %s\n" , s, unbounded_int2string(tab[c-'a']));
 }
 
-void affectVar(Texte ligne, Variable *list){
-    // Verifie si la Variable est déja définie
-        Variable *v1 = contains(list, ligne -> str);
+void affectVar(Texte ligne, unbounded_int *tab){
+    char *var = ligne->str;
     // On récupère l'affectation
     Mot *tmp = ligne;
     while(strcmp(tmp -> str, "=") != 0){
@@ -185,27 +134,14 @@ void affectVar(Texte ligne, Variable *list){
     // Sinon on récupère la Variable et on vérifie si la Variable est définie
     if(is_int(res) == 1){
         n = string2unbounded_int(res);
-
     }else{
-        Variable *v2 = contains(list, res);
-        if(v2 != NULL){
-            n = v2 -> value;
-        }else{
-            n = init_result(1);
-        }
-    }
-    // Si la Variable n'est pas définie on l'ajoute dans la liste avec l'affectation
-    // Sinon on modifie la valeur de la Variable
-    if(v1 == NULL){
-        list = addVar(list, ligne -> str, n);
-    }else{
-        v1 -> value = n;
+        char c = res[0];
+        n = tab[c-'a'];
     }
 }
 
-void opVar(Texte ligne, Variable *list, char signe){
-    // Verifie si la Variable est déja définie
-    Variable *v1 = contains(list, ligne -> str);
+void opVar(Texte ligne, unbounded_int *tab, char signe){
+    char *var = ligne->str;
     // On récupère l'affectation
     Mot *tmp = ligne;
     while(strcmp(tmp -> str, "=") != 0){
@@ -221,12 +157,8 @@ void opVar(Texte ligne, Variable *list, char signe){
     if(is_int(res1) == 1){
         n1 = string2unbounded_int(res1);
     }else{
-        Variable *v2 = contains(list, res1);
-        if(v2 != NULL){
-            n1 = v2 -> value;
-        }else{
-            n1 = init_result(1);
-        }
+        char c = res1[0];
+        n1 = tab[c-'a'];
     }
     tmp = tmp -> next -> next;
     char *res2 = tmp -> str;
@@ -235,39 +167,28 @@ void opVar(Texte ligne, Variable *list, char signe){
     if(is_int(res2) == 1){
         n2 = string2unbounded_int(res2);
     }else{
-        Variable *v2 = contains(list, res2);
-        if(v2 != NULL){
-            n2 = v2 -> value;
-        }else{
-            n2 = init_result(1);
-        }
+        char c = res2[0];
+        n2 = tab[c-'a'];
     }
     if(signe == '+'){
-        if(v1 == NULL){
-            list = addVar(list, ligne -> str, unbounded_int_somme(n1,n2));
-        }else{
-            v1 -> value = unbounded_int_somme(n1,n2);
-        }
+        unbounded_int somme = unbounded_int_somme(n1,n2);
+        char c = var[0];
+        tab[c-'a'] = somme;
     }else if(signe == '-'){
-        if(v1 == NULL){
-            list = addVar(list, ligne -> str, unbounded_int_difference(n1,n2));
-        }else{
-            v1 -> value = unbounded_int_difference(n1,n2);
-        }
+        unbounded_int difference = unbounded_int_difference(n1,n2);
+        char c = var[0];
+        tab[c-'a'] = difference;
     }else if(signe == '*'){
-        if(v1 == NULL){
-            list = addVar(list, ligne -> str, unbounded_int_produit(n1,n2));
-        }else{
-            unbounded_int res = unbounded_int_produit(n1,n2);
-            v1 -> value = res;
-        }
+        unbounded_int produit = unbounded_int_produit(n1,n2);
+        char c = var[0];
+        tab[c-'a'] = produit;
     }
 }
 
 void readFile(FILE *input, FILE *output) {
     Texte texte = NULL;
-    ListeVar variables = NULL;
-    variables = addVar(variables, "a", string2unbounded_int("45"));
+    unbounded_int *variables = malloc(MAX_VAR_NUMBER * sizeof(unbounded_int));
+    assert (variables != NULL);
     int i = 0;
     int a = 0, b = 0;
     char *c = malloc(sizeof(char) * MAX_LENGTH);
