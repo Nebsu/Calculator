@@ -46,6 +46,7 @@ int main(){
     print_unbounded_int(unbounded_int_somme(b,d));
     print_unbounded_int(unbounded_int_somme(a,f));
     print_unbounded_int(unbounded_int_somme(f,a));
+    print_unbounded_int(unbounded_int_somme(c,c));
 
     printf("TEST UNBOUNDED_INT_DIFFERENCE :\n");
     print_unbounded_int(unbounded_int_difference(a,a));

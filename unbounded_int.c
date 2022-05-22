@@ -116,7 +116,7 @@ char *unbounded_int2string(unbounded_int i){
         if(j == 0){
             res[j] = i.signe;
         } else {
-            res[j] = i.premier -> c;
+            res[j] = current -> c;
             current = current -> suivant;
         }
     }
@@ -253,6 +253,10 @@ static unbounded_int unbounded_int_difference_positif(unbounded_int a, unbounded
 
 unbounded_int unbounded_int_somme(unbounded_int a, unbounded_int b){
     unbounded_int res = {.signe = '+', .len = 0, .premier = NULL, .dernier = NULL};
+    unbounded_int zero = init_result(1);
+    if(a.dernier -> c == '0' || b.dernier -> c == '0'){
+        return init_result(1);
+    }
     if(a.signe == '+' && b.signe == '+'){
         res = unbounded_int_somme_positif(a, b);
     }else if (a.signe == '-' && b.signe == '-'){

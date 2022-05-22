@@ -46,7 +46,7 @@ ListeVar addVar(ListeVar list, char* str, unbounded_int val) {
 // Retourne la Variable si elle est dans la liste, sinon retourne NULL
 Variable *contains(Variable *list, char* str) {
     Variable *current = list;
-    while (current->next != NULL) {
+    while (current != NULL) {
         if(strcmp(str, current -> label) == 0) {
             return current;
         }
@@ -58,7 +58,7 @@ Variable *contains(Variable *list, char* str) {
 void afficherVar(ListeVar liste) {
     Variable *tmp = liste;
     while(tmp != NULL){
-        printf("%s", tmp->label);
+        printf("-%s = %s-\n", tmp->label, unbounded_int2string(tmp->value));
         tmp = tmp->next;
     }
 }
@@ -97,7 +97,7 @@ int isWord(const char *str) {
 
 // Fonctions qui détecte le type de la ligne (print, affectation ou opération) : 
 
-int isPrint(Texte ligne, Variable *variables) {
+int isPrint(Texte ligne) {
     if (ligne == NULL) return 0;
     char *s1 = ligne->str;
     if (isWord(s1) == 0) return 0;
@@ -110,37 +110,33 @@ int isPrint(Texte ligne, Variable *variables) {
     return 1;
 }
 
-int isAffectation(Texte ligne, Variable *variables) {
+int isAffectation(Texte ligne) {
     if (ligne == NULL) return 0;
-    afficherTexte(ligne);
-    printf("\n");
+    // afficherTexte(ligne);
+    // printf("\n");
     char *s1 = ligne->str;
     if (isWord(s1) == 0) return 0;
     ligne = ligne->next;
     
     if (ligne == NULL) return 0;
-    afficherTexte(ligne);
-    printf("\n");
+    // afficherTexte(ligne);
+    // printf("\n");
     char *s2 = ligne->str;
     if (strcmp(s2, "=") != 0) return 0;
     ligne = ligne->next;
 
     if (ligne == NULL) return 0;
-    afficherTexte(ligne);
-    printf("\n");
+    // afficherTexte(ligne);
+    // printf("\n");
     char *s3 = ligne->str;
-    if (is_int(s3) == 1) return 1;
-    if (isWord(s3) == 1) return 1;
+    if(is_int(s3) == 0 && isWord(s3) == 0) return 0;
     ligne = ligne->next;
 
     if (ligne == NULL) return 1;
-    afficherTexte(ligne);
-    printf("\n");
     return 0;
 }
 
-char isOperation(Texte ligne, Variable *variables) {
-    printf("1");
+char isOperation(Texte ligne) {
     if (ligne == NULL) return 'F';
     // afficherTexte(ligne);
     char *s1 = ligne->str;
@@ -168,17 +164,18 @@ char isOperation(Texte ligne, Variable *variables) {
 // Fonctions qui effectue les procédures du fichier texte (print, affectation ou opération) :
 
 void printVar(FILE* dest, Texte ligne, Variable *list) {
-    Variable *v = contains(list, ligne -> str);
+    Variable *v = contains(list, ligne -> next -> str);
     if(v != NULL){
         fprintf(dest, "%s = %s\n" , v -> label, unbounded_int2string(v -> value));
     }else{
         fprintf(dest, "%s = %d\n" , ligne -> next -> str, 0);
     }
+    // afficherVar(list);
 }
 
 void affectVar(Texte ligne, Variable *list){
     // Verifie si la Variable est déja définie
-    Variable *v1 = contains(list, ligne -> str);
+        Variable *v1 = contains(list, ligne -> str);
     // On récupère l'affectation
     Mot *tmp = ligne;
     while(strcmp(tmp -> str, "=") != 0){
@@ -191,6 +188,7 @@ void affectVar(Texte ligne, Variable *list){
     // Sinon on récupère la Variable et on vérifie si la Variable est définie
     if(is_int(res) == 1){
         n = string2unbounded_int(res);
+
     }else{
         Variable *v2 = contains(list, res);
         if(v2 != NULL){
@@ -220,7 +218,7 @@ void opVar(Texte ligne, Variable *list, char signe){
     char *res1 = tmp -> str;
     // Variable 1 :
     // On vérifie si l'affectation est un entier ou une Variable
-    // Si c'est un entier on transforme l'entier en u_int
+    // Si c'est un entier on transforme l'entier en unbounded_int
     // Sinon on récupère la Variable et on vérifie si la Variable est définie
     unbounded_int n1;
     if(is_int(res1) == 1){
@@ -257,22 +255,22 @@ void opVar(Texte ligne, Variable *list, char signe){
         if(v1 == NULL){
             list = addVar(list, ligne -> str, unbounded_int_difference(n1,n2));
         }else{
-            v1 -> value = unbounded_int_somme(n1,n2);
+            v1 -> value = unbounded_int_difference(n1,n2);
         }
     }else if(signe == '*'){
         if(v1 == NULL){
             list = addVar(list, ligne -> str, unbounded_int_produit(n1,n2));
         }else{
-            v1 -> value = unbounded_int_somme(n1,n2);
+            unbounded_int res = unbounded_int_produit(n1,n2);
+            v1 -> value = res;
         }
-
     }
 }
 
 void readFile(FILE *input, FILE *output) {
     Texte texte = NULL;
-    ListeVar variables = malloc(sizeof(ListeVar));
-    assert(variables != NULL);
+    ListeVar variables = NULL;
+    variables = addVar(variables, "a", string2unbounded_int("45"));
     int i = 0;
     int a = 0, b = 0;
     char *c = malloc(sizeof(char) * MAX_LENGTH);
@@ -300,20 +298,16 @@ void readFile(FILE *input, FILE *output) {
             ligne = ajouterFin(ligne, texte -> str);
             texte = texte -> next;
         }
-        afficherTexte(ligne);
-        printf("\n");
+        // afficherTexte(ligne);
         // Traitement de la ligne :
-        if (isPrint(ligne, variables) == 1) {
-            printf("printlll\n");
+        if (isPrint(ligne) == 1) {
             printVar(output, ligne, variables);
-        } else if (isAffectation(ligne, variables) == 1) {
-            printf("affectation\n");
+        } else if (isAffectation(ligne) == 1) {
             affectVar(ligne, variables);
-        } else if (isOperation(ligne, variables) != 'F') {
-            printf("operation\n");
-            opVar(ligne, variables, isOperation(ligne, variables));
+        } else if (isOperation(ligne) != 'F') {
+            opVar(ligne, variables, isOperation(ligne));
         } else {
-            fprintf(output, "Ligne vide ou invalide\n");
+            fprintf(output,"Ligne vide ou invalide\n");
         }
         texte = texte -> next;
         ligne = ligne -> next;
@@ -330,23 +324,28 @@ int main(int argc, char const *argv[]) {
     if (argc == 1) {
         file1 = stdin;
         file2 = stdout;
+        readFile(file1, file2);
     } else if (argc == 3) {
         if (strcmp(argv[1], "-i")==0) {
             file1 = fopen(argv[2], "r");
             file2 = stdout;
+            readFile(file1, file2);
         } else if (strcmp(argv[1], "-o")) {
             file1 = stdin;
-            file2 = fopen(argv[2], "a+");
+            file2 = fopen(argv[2], "w");
+            readFile(file1, file2);
         } else goto error;
     } else if (argc == 5) {
         if (strcmp(argv[1], "-i")!=0 || strcmp(argv[3], "-o")!=0) goto error;
         file1 = fopen(argv[2], "r");
-        file2 = fopen(argv[4], "a+");
+        file2 = fopen(argv[4], "w");
+        readFile(file1, file2);
     } else {
         error :
         perror("Argument error");
         return 1;
     }
-    readFile(file1, file2);
+    fclose(file1);
+    fclose(file2);
     return 0;
 }
