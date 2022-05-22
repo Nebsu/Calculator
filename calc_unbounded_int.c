@@ -41,14 +41,6 @@ void afficherTexte(Texte liste){
     }
 }
 
-int isWord(const char *str) {
-    size_t n = strlen(str);
-    for (int i=0; i<n; i++) {
-        if (isalpha(str[i]) == 0) return 0;
-    }
-    return 1;
-}
-
 // Fonctions qui détecte le type de la ligne (print, affectation ou opération) : 
 
 int isPrint(Texte ligne) {
@@ -116,17 +108,21 @@ char isOperation(Texte ligne) {
 void printVar(FILE* dest, Texte ligne, unbounded_int *tab) {
     char *s = ligne->next->str;
     char c = s[0];
-    fprintf(dest, "%s = %s\n" , s, unbounded_int2string(tab[c-'a']));
+    unbounded_int n= tab[c - 'a'];
+    printf("%c = " , c);
+    print_unbounded_int(n);
 }
 
 void affectVar(Texte ligne, unbounded_int *tab){
     char *var = ligne->str;
     // On récupère l'affectation
     Mot *tmp = ligne;
-    while(strcmp(tmp -> str, "=") != 0){
-        tmp = tmp -> next;
-    }
+
+    tmp = tmp -> next;
     char *res = tmp -> next -> str;
+    char v = var[0];
+    char c = res[0];
+
     unbounded_int n;
     // On vérifie si l'affectation est un entier ou une Variable
     // Si c'est un entier on transforme l'entier en u_int
@@ -134,9 +130,9 @@ void affectVar(Texte ligne, unbounded_int *tab){
     if(is_int(res) == 1){
         n = string2unbounded_int(res);
     }else{
-        char c = res[0];
         n = tab[c-'a'];
     }
+    tab[v-'a'] = n;
 }
 
 void opVar(Texte ligne, unbounded_int *tab, char signe){
@@ -192,38 +188,45 @@ void readFile(FILE *input, FILE *output) {
         variables[i] = init_result(1);
     }
     int i = 0;
-    int a = 0, b = 0;
+    int a = 0;
     char *c = malloc(sizeof(char));
     // Ajoute toutes les lignes dans le texte
     while((i = fgetc(input))!= EOF) {
-        if(i != ' ' && a != 0){
+        if(i == ' ' && a == 0){
+            continue;
+        }else{
+            if(a == 0){
+               c[0] = i;
+               c[1] = '\0';
+               a = 1;
+               texte = ajouterFin(texte, c);
+            }
             if( i == '\n') texte = ajouterFin(texte, "\n");
             char *mot = malloc(sizeof(char));
             assert(mot != NULL);
             fscanf(input, "%s", mot);
             texte = ajouterFin(texte, mot);
-        }else{
-            c[0] = i;
-            c[1] = '\0';
-            a = 1;
-            texte = ajouterFin(texte, c);
+            a++;
         }
     }
-    Texte ligne;
+    Texte ligne = NULL;
     // afficherTexte(texte);
     // Récupère les lignes
     while (texte != NULL) {
-        while(strcmp(texte -> str, "\n") != 0){
+        while(strcmp(texte -> str, "\n") != 0 || texte -> next == NULL){
             ligne = ajouterFin(ligne, texte -> str);
             texte = texte -> next;
         }
-        afficherTexte(ligne);
+        // afficherTexte(ligne);
         // Traitement de la ligne :
         if (isPrint(ligne) == 1) {
+            // printf("PRINT\n");
             printVar(output, ligne, variables);
         } else if (isAffectation(ligne) == 1) {
             affectVar(ligne, variables);
+            // printf("AFFECTATION\n");
         } else if (isOperation(ligne) != 'F') {
+            // printf("OPERATION\n");
             opVar(ligne, variables, isOperation(ligne));
         } else {
             fprintf(output,"Ligne vide ou invalide\n");
@@ -231,10 +234,8 @@ void readFile(FILE *input, FILE *output) {
         texte = texte -> next;
         ligne = ligne -> next;
         ligne = NULL;
+
     }
-    // Quand on refait la boucle on arrive sur la ligne 2
-    // afficherTexte(ligne);
-    // afficherTexte(texte);
 }
 
 int main(int argc, char const *argv[]) {
