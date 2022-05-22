@@ -103,7 +103,7 @@ unbounded_int ll2unbounded_int(long long i) {
             i /= 10;
         }
     }
-    return res;
+    return remove_zeros(res);
 }
 
 char *unbounded_int2string(unbounded_int i){
@@ -253,8 +253,7 @@ static unbounded_int unbounded_int_difference_positif(unbounded_int a, unbounded
 
 unbounded_int unbounded_int_somme(unbounded_int a, unbounded_int b){
     unbounded_int res = {.signe = '+', .len = 0, .premier = NULL, .dernier = NULL};
-    unbounded_int zero = init_result(1);
-    if(a.dernier -> c == '0' || b.dernier -> c == '0'){
+    if(a.dernier -> c == '0' && b.dernier -> c == '0' && a.dernier == a.premier){
         return init_result(1);
     }
     if(a.signe == '+' && b.signe == '+'){
@@ -338,7 +337,7 @@ unbounded_int unbounded_int_produit(unbounded_int a, unbounded_int b){
     if(a.signe != b.signe){
         res.signe = '-';
     }
-    if(a.dernier -> c == '0' || b.dernier -> c == '0'){
+    if((a.dernier->c == '0' && a.premier->c == '0') || (b.dernier->c == '0' && b.premier->c == '0')){
         return init_result(1);
     }
     int r;

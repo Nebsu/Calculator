@@ -8,6 +8,7 @@ int main(){
     unbounded_int d = string2unbounded_int("234");
     unbounded_int e = string2unbounded_int("-415");
     unbounded_int f = string2unbounded_int("-1234");
+    unbounded_int g = string2unbounded_int("10");
     
     printf("TEST STRING2UNBOUNDED_INT :\n");
     print_unbounded_int(a);
@@ -47,6 +48,7 @@ int main(){
     print_unbounded_int(unbounded_int_somme(a,f));
     print_unbounded_int(unbounded_int_somme(f,a));
     print_unbounded_int(unbounded_int_somme(c,c));
+    print_unbounded_int(unbounded_int_somme(g,g));
 
     printf("TEST UNBOUNDED_INT_DIFFERENCE :\n");
     print_unbounded_int(unbounded_int_difference(a,a));
@@ -71,5 +73,6 @@ int main(){
     print_unbounded_int(unbounded_int_produit(f,a));
     print_unbounded_int(unbounded_int_produit(c,a));
     print_unbounded_int(unbounded_int_produit(a,c));
+    print_unbounded_int(unbounded_int_produit(ll2unbounded_int(10),ll2unbounded_int(10)));
     return 0;
 }
