@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"typeinfo": "c",
+			"limits": "c",
+			"type_traits": "c"
+		}
+	}
+}
