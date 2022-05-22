@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "unbounded_int.c"
 #include <ctype.h>
+
+#include "unbounded_int.c"
 
 #define MAX_LENGTH 500
 
@@ -25,24 +26,6 @@ typedef Variable* ListeVar;
 
 // Fonctions sur les variables :
 
-ListeVar addVar(ListeVar list, char* str, unbounded_int val) {
-    Variable* newElem = malloc(sizeof(Variable));
-    assert(newElem != NULL);
-    newElem->label = str;
-    newElem->next = NULL;
-    newElem->value = val;
-    if(list == NULL) {
-        return newElem;
-    } else {
-        Variable* temp=list;
-        while(temp->next != NULL) {
-            temp = temp->next;
-        }
-        temp->next = newElem;
-        return list;
-    }
-}
-
 // Retourne la Variable si elle est dans la liste, sinon retourne NULL
 Variable *contains(Variable *list, char* str) {
     Variable *current = list;
@@ -53,6 +36,29 @@ Variable *contains(Variable *list, char* str) {
         current = current->next;
     }
     return NULL;
+}
+
+// Ajoute la variable ou la modifie s'il existe déja dans la liste :
+ListeVar addVar(ListeVar list, char* str, unbounded_int val) {
+    Variable* newElem = malloc(sizeof(Variable));
+    assert(newElem != NULL);
+    newElem->label = str;
+    newElem->next = NULL;
+    newElem->value = val;
+    Variable *clone = contains(list, str);
+    if (list == NULL) {
+        return newElem;
+    } else if (clone != NULL) {
+        clone->value = val;
+        return list;
+    } else {
+        Variable* temp = list;
+        while(temp->next != NULL) {
+            temp = temp->next;
+        }
+        temp->next = newElem;
+        return list;
+    }
 }
 
 void afficherVar(ListeVar liste) {
@@ -98,65 +104,61 @@ int isWord(const char *str) {
 // Fonctions qui détecte le type de la ligne (print, affectation ou opération) : 
 
 int isPrint(Texte ligne) {
-    if (ligne == NULL) return 0;
-    char *s1 = ligne->str;
+    Mot *ptr = ligne;
+    if (ptr == NULL) return 0;
+    char *s1 = ptr->str;
     if (isWord(s1) == 0) return 0;
     if (strcmp(s1, "print") != 0) return 0;
-    ligne = ligne->next;
+    ptr = ptr->next;
 
-    if (ligne == NULL) return 0;
-    char *s2 = ligne->str;
+    if (ptr == NULL) return 0;
+    char *s2 = ptr->str;
     if (isWord(s2) == 0) return 0;
     return 1;
 }
 
 int isAffectation(Texte ligne) {
-    if (ligne == NULL) return 0;
-    // afficherTexte(ligne);
-    // printf("\n");
-    char *s1 = ligne->str;
+    Mot *ptr = ligne;
+    if (ptr == NULL) return 0;
+    char *s1 = ptr->str;
     if (isWord(s1) == 0) return 0;
-    ligne = ligne->next;
+    ptr = ptr->next;
     
-    if (ligne == NULL) return 0;
-    // afficherTexte(ligne);
-    // printf("\n");
-    char *s2 = ligne->str;
+    if (ptr == NULL) return 0;
+    char *s2 = ptr->str;
     if (strcmp(s2, "=") != 0) return 0;
-    ligne = ligne->next;
+    ptr = ptr->next;
 
-    if (ligne == NULL) return 0;
-    // afficherTexte(ligne);
-    // printf("\n");
-    char *s3 = ligne->str;
+    if (ptr == NULL) return 0;
+    char *s3 = ptr->str;
     if(is_int(s3) == 0 && isWord(s3) == 0) return 0;
-    ligne = ligne->next;
+    ptr = ptr->next;
 
-    if (ligne == NULL) return 1;
+    if (ptr == NULL) return 1;
     return 0;
 }
 
 char isOperation(Texte ligne) {
-    if (ligne == NULL) return 'F';
-    // afficherTexte(ligne);
-    char *s1 = ligne->str;
+    Mot *ptr = ligne;
+    if (ptr == NULL) return 'F';
+    char *s1 = ptr->str;
     if (isWord(s1) == 0) return 'F';
-    ligne = ligne->next;
-    if (ligne == NULL) return 'F';
-    char *s2 = ligne->str;
+    ptr = ptr->next;
+    if (ptr == NULL) return 'F';
+    char *s2 = ptr->str;
     if (strcmp(s2, "=") != 0) return 'F';
-    ligne = ligne->next;
-    if (ligne == NULL) return 'F';
-    char *s3 = ligne->str;
+    ptr = ptr->next;
+    if (ptr == NULL) return 'F';
+    char *s3 = ptr->str;
     // On doit avoir des nombres ou des variables :
     if (is_int(s3) == 0 && isWord(s3) == 0) return 'F';
-    ligne = ligne -> next;
-    if (ligne == NULL) return 'F';
-    char *s4 = ligne->str;
+    ptr = ptr -> next;
+    if (ptr == NULL) return 'F';
+    char *s4 = ptr->str;
     if (strcmp(s4, "+") != 0 && strcmp(s4, "-") != 0 && strcmp(s4, "*") != 0) return 'F';
-    ligne = ligne->next;
-    if (ligne == NULL) return 'F';
-    char *s5 = ligne->str;
+    ptr = ptr->next;
+    if (ptr == NULL) return 'F';
+    char *s5 = ptr->str;
     if (is_int(s5) == 0 && isWord(s5) == 0) return 'F';
     return s4[0];
 }
@@ -166,31 +168,30 @@ char isOperation(Texte ligne) {
 void printVar(FILE* dest, Texte ligne, Variable *list) {
     Variable *v = contains(list, ligne -> next -> str);
     if(v != NULL){
-        fprintf(dest, "%s = %s\n" , v -> label, unbounded_int2string(v -> value));
+        char *s = unbounded_int2string(v -> value);
+        fprintf(dest, "%s = %s\n" , v -> label, s);
     }else{
         fprintf(dest, "%s = %d\n" , ligne -> next -> str, 0);
     }
-    // afficherVar(list);
 }
 
 void affectVar(Texte ligne, Variable *list){
     // Verifie si la Variable est déja définie
-        Variable *v1 = contains(list, ligne -> str);
+    Variable *v1 = contains(list, ligne -> str);
     // On récupère l'affectation
-    Mot *tmp = ligne;
-    while(strcmp(tmp -> str, "=") != 0){
-        tmp = tmp -> next;
+    while(strcmp(ligne -> str, "=") != 0){
+        ligne = ligne -> next;
     }
-    char *res = tmp -> next -> str;
+    ligne = ligne -> next;
+    char *val = ligne -> str;
     unbounded_int n;
     // On vérifie si l'affectation est un entier ou une Variable
     // Si c'est un entier on transforme l'entier en u_int
     // Sinon on récupère la Variable et on vérifie si la Variable est définie
-    if(is_int(res) == 1){
-        n = string2unbounded_int(res);
-
+    if(is_int(val) == 1){
+        n = string2unbounded_int(val);
     }else{
-        Variable *v2 = contains(list, res);
+        Variable *v2 = contains(list, val);
         if(v2 != NULL){
             n = v2 -> value;
         }else{
@@ -199,78 +200,66 @@ void affectVar(Texte ligne, Variable *list){
     }
     // Si la Variable n'est pas définie on l'ajoute dans la liste avec l'affectation
     // Sinon on modifie la valeur de la Variable
-    if(v1 == NULL){
-        list = addVar(list, ligne -> str, n);
-    }else{
-        v1 -> value = n;
-    }
+    list = addVar(list, ligne -> str, n);
 }
 
 void opVar(Texte ligne, Variable *list, char signe){
-    // Verifie si la Variable est déja définie
-    Variable *v1 = contains(list, ligne -> str);
     // On récupère l'affectation
-    Mot *tmp = ligne;
-    while(strcmp(tmp -> str, "=") != 0){
-        tmp = tmp -> next;
+    while(strcmp(ligne -> str, "=") != 0){
+        ligne = ligne -> next;
     }
-    tmp = tmp -> next;
-    char *res1 = tmp -> str;
+    ligne = ligne -> next;
+    char *mot1 = ligne -> str;
     // Variable 1 :
     // On vérifie si l'affectation est un entier ou une Variable
     // Si c'est un entier on transforme l'entier en unbounded_int
     // Sinon on récupère la Variable et on vérifie si la Variable est définie
     unbounded_int n1;
-    if(is_int(res1) == 1){
-        n1 = string2unbounded_int(res1);
+    if(is_int(mot1) == 1){
+        n1 = string2unbounded_int(mot1);
     }else{
-        Variable *v2 = contains(list, res1);
+        Variable *v2 = contains(list, mot1);
         if(v2 != NULL){
             n1 = v2 -> value;
         }else{
             n1 = init_result(1);
         }
     }
-    tmp = tmp -> next -> next;
-    char *res2 = tmp -> str;
+    ligne = ligne -> next -> next;
+    char *mot2 = ligne -> str;
     // Variable 2 :
     unbounded_int n2;
-    if(is_int(res2) == 1){
-        n2 = string2unbounded_int(res2);
+    if(is_int(mot2) == 1){
+        n2 = string2unbounded_int(mot2);
     }else{
-        Variable *v2 = contains(list, res2);
+        Variable *v2 = contains(list, mot2);
         if(v2 != NULL){
             n2 = v2 -> value;
         }else{
             n2 = init_result(1);
         }
     }
-    if(signe == '+'){
-        if(v1 == NULL){
-            list = addVar(list, ligne -> str, unbounded_int_somme(n1,n2));
-        }else{
-            v1 -> value = unbounded_int_somme(n1,n2);
-        }
-    }else if(signe == '-'){
-        if(v1 == NULL){
-            list = addVar(list, ligne -> str, unbounded_int_difference(n1,n2));
-        }else{
-            v1 -> value = unbounded_int_difference(n1,n2);
-        }
-    }else if(signe == '*'){
-        if(v1 == NULL){
-            list = addVar(list, ligne -> str, unbounded_int_produit(n1,n2));
-        }else{
-            unbounded_int res = unbounded_int_produit(n1,n2);
-            v1 -> value = res;
-        }
+    if (signe == '+') {
+        unbounded_int somme = unbounded_int_somme(n1, n2);
+        printf("somme = ");
+        print_unbounded_int(somme);
+        list = addVar(list, ligne -> str, somme);
+    } else if (signe == '-') {
+        unbounded_int diff = unbounded_int_difference(n1,n2);
+        printf("différence = ");
+        print_unbounded_int(diff);
+        list = addVar(list, ligne -> str, diff);
+    } else if (signe == '*') {
+        unbounded_int prod = unbounded_int_produit(n1,n2);
+        printf("produit = ");
+        print_unbounded_int(prod);
+        list = addVar(list, ligne -> str, prod);
     }
 }
 
 void readFile(FILE *input, FILE *output) {
     Texte texte = NULL;
-    ListeVar variables = NULL;
-    variables = addVar(variables, "a", string2unbounded_int("45"));
+    static ListeVar variables = NULL;
     int i = 0;
     int a = 0, b = 0;
     char *c = malloc(sizeof(char) * MAX_LENGTH);
