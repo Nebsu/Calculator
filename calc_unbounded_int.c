@@ -22,6 +22,7 @@ typedef struct Variable {
     unbounded_int value;
     struct Variable *next;
 } Variable;
+typedef Variable* ListeVar;
 
 // Fonctions sur les variables :
 
@@ -38,8 +39,8 @@ Variable *contains(Variable *list, char* str) {
 }
 
 // Ajoute la variable ou la modifie s'il existe déja dans la liste :
-Variable *addVar(Variable *list, char* str, unbounded_int val) {
-    Variable *newElem = malloc(sizeof(Variable));
+ListeVar addVar(ListeVar list, char* str, unbounded_int val) {
+    Variable* newElem = malloc(sizeof(Variable));
     assert(newElem != NULL);
     newElem->label = str;
     newElem->next = NULL;
@@ -60,11 +61,10 @@ Variable *addVar(Variable *list, char* str, unbounded_int val) {
     }
 }
 
-void afficherVar(Variable *liste) {
+void afficherVar(ListeVar liste) {
     Variable *tmp = liste;
     while(tmp != NULL){
-        char *s = unbounded_int2string(tmp->value);
-        printf("-%s = %s-\n", tmp->label, s);
+        printf("-%s = %s-\n", tmp->label, unbounded_int2string(tmp->value));
         tmp = tmp->next;
     }
 }
@@ -168,7 +168,6 @@ char isOperation(Texte ligne) {
 void printVar(FILE* dest, Texte ligne, Variable *list) {
     Variable *v = contains(list, ligne -> next -> str);
     if(v != NULL){
-        printf("ok\n");
         char *s = unbounded_int2string(v -> value);
         fprintf(dest, "%s = %s\n" , v -> label, s);
     }else{
