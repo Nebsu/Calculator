@@ -1,11 +1,3 @@
-      a = 8412 + b
-a fazf azafa
-sfgdvgsvfsgfvd
-retczertc
-  zhrreh
-  fezfez
-  zef
-  ezf
-  efz
-  zfe
-  
+aaaaa = 897676764344676545687876565
+
+a = a - 7867656443555498966543

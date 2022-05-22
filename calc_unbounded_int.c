@@ -3,6 +3,9 @@
 #include <string.h>
 #include <assert.h>
 #include "unbounded_int.c"
+#include <ctype.h>
+
+#define MAX_LENGTH 500
 
 // Structures :
 
@@ -52,7 +55,7 @@ Variable *contains(Variable *list, char* str) {
     return NULL;
 }
 
-void afficherListe(ListeVar liste) {
+void afficherVar(ListeVar liste) {
     Variable *tmp = liste;
     while(tmp != NULL){
         printf("%s", tmp->label);
@@ -76,24 +79,12 @@ Texte ajouterFin(Texte liste, char* valeur){
     }
 }
 
-void afficherListe(Texte liste){
+void afficherTexte(Texte liste){
     Mot *tmp = liste;
     while(tmp != NULL){
-        printf("%s", tmp->str);
+        printf("%s ", tmp->str);
         tmp = tmp->next;
     }
-}
-
-void abc(char *str, ListeVar t){
-    t = addVar(t, str, ll2unbounded_int(1));
-}
-
-int isNumber(const char *str) {
-    size_t n = strlen(str);
-    for (int i=0; i<n; i++) {
-        if (isdigit(str[i]) == 0) return 0;
-    }
-    return 1;
 }
 
 int isWord(const char *str) {
@@ -108,67 +99,67 @@ int isWord(const char *str) {
 
 int isPrint(Texte ligne, Variable *variables) {
     if (ligne == NULL) return 0;
-    afficherListe(ligne);
+    // afficherTexte(ligne);
     char *s1 = ligne->str;
     if (isWord(s1) == 0) return 0;
     if (strcmp(s1, "print") != 0) return 0;
     ligne = ligne->next;
     if (ligne == NULL) return 0;
     char *s2 = ligne->str;
-    if (contains(variables, s2) == NULL) return 0;
     return 1;
 }
 
 int isAffectation(Texte ligne, Variable *variables) {
     if (ligne == NULL) return 0;
-    afficherListe(ligne);
+    afficherTexte(ligne);
+    printf("\n");
     char *s1 = ligne->str;
     if (isWord(s1) == 0) return 0;
     ligne = ligne->next;
-    // Cas variable non-initialisée :
-    if (ligne == NULL) return 1;
+    afficherTexte(ligne);
+    printf("\n");
+
+    if (ligne == NULL) return 0;
     char *s2 = ligne->str;
     if (strcmp(s2, "=") != 0) return 0;
     ligne = ligne->next;
+    afficherTexte(ligne);
+    printf("\n");
     if (ligne == NULL) return 0;
     char *s3 = ligne->str;
-    if (isNumber(s3) == 1) return 1;
-    if (isWord(s3) == 1) {
-        if (contains(variables, s3) != NULL) return 1;
-    }
+    if (is_int(s3) == 1) return 1;
+    if (isWord(s3) == 1) return 1;
+    ligne = ligne->next;
+    afficherTexte(ligne);
+    printf("\n");
+    if (ligne == NULL) return 1;
     return 0;
 }
 
-int isOperation(Texte ligne, Variable *variables) {
-    if (ligne == NULL) return 0;
-    afficherListe(ligne);
+char isOperation(Texte ligne, Variable *variables) {
+    printf("1");
+    if (ligne == NULL) return 'F';
+    // afficherTexte(ligne);
     char *s1 = ligne->str;
-    if (isWord(s1) == 0) return 0;
-    if (contains(variables, s1) == NULL) return 0;
+    if (isWord(s1) == 0) return 'F';
     ligne = ligne->next;
-    if (ligne == NULL) return 0;
+    if (ligne == NULL) return 'F';
     char *s2 = ligne->str;
-    if (strcmp(s2, "=") != 0) return 0;
+    if (strcmp(s2, "=") != 0) return 'F';
     ligne = ligne->next;
-    if (ligne == NULL) return 0;
+    if (ligne == NULL) return 'F';
     char *s3 = ligne->str;
     // On doit avoir des nombres ou des variables :
-    if (isNumber(s3) == 0 && isWord(s3) == 0) return 0;
-    if (isWord(s3) == 1) {
-        if (contains(variables, s3) == NULL) return 0;
-    }
+    if (is_int(s3) == 0 && isWord(s3) == 0) return 'F';
     ligne = ligne -> next;
-    if (ligne == NULL) return 0;
+    if (ligne == NULL) return 'F';
     char *s4 = ligne->str;
-    if (strcmp(s4, "+") != 0 && strcmp(s4, "-") != 0 && strcmp(s4, "*") != 0) return 0;
+    if (strcmp(s4, "+") != 0 && strcmp(s4, "-") != 0 && strcmp(s4, "*") != 0) return 'F';
     ligne = ligne->next;
-    if (ligne == NULL) return 0;
+    if (ligne == NULL) return 'F';
     char *s5 = ligne->str;
-    if (isNumber(s3) == 0 && isWord(s3) == 0) return 0;
-    if (isWord(s3) == 1) {
-        if (contains(variables, s3) == NULL) return 0;
-    }
-    return 1;
+    if (is_int(s5) == 0 && isWord(s5) == 0) return 'F';
+    return s4[0];
 }
 
 // Fonctions qui effectue les procédures du fichier texte (print, affectation ou opération) :
@@ -279,53 +270,69 @@ void readFile(FILE *input, FILE *output) {
     Texte texte = NULL;
     ListeVar variables = malloc(sizeof(ListeVar));
     assert(variables != NULL);
-    int i;
+    int i = 0;
+    int a = 0, b = 0;
+    char *c = malloc(sizeof(char) * MAX_LENGTH);
     // Ajoute toutes les lignes dans le texte
     while((i = fgetc(input))!= EOF) {
-        if( i == '\n') texte = ajouterFin(texte, "\n");
-        char *Mot = malloc(sizeof(char));
-        assert(Mot != NULL);
-        fscanf(input, "%s", Mot);
-        texte = ajouterFin(texte, Mot);
+        if(a == 0 && i != ' '){
+            c[b] = i;
+            b++;
+        }else{
+            if(a == 0) texte = ajouterFin(texte, c);
+            if( i == '\n') texte = ajouterFin(texte, "\n");
+            char *mot = malloc(sizeof(char)*MAX_LENGTH);
+            assert(mot != NULL);
+            fscanf(input, "%s", mot);
+            texte = ajouterFin(texte, mot);
+            b = 1;
+            a++;
+        }
     }
     Texte ligne;
+    // afficherTexte(texte);
     // Récupère les lignes
     while (texte != NULL) {
         while(strcmp(texte -> str, "\n") != 0){
-            ligne = NULL;
             ligne = ajouterFin(ligne, texte -> str);
             texte = texte -> next;
         }
+        afficherTexte(ligne);
+        printf("\n");
         // Traitement de la ligne :
         if (isPrint(ligne, variables) == 1) {
-
+            printf("printlll\n");
+            printVar(output, ligne, variables);
         } else if (isAffectation(ligne, variables) == 1) {
-
-        } else if (isOperation(ligne, variables) == 1) {
-
+            printf("affectation\n");
+            affectVar(ligne, variables);
+        } else if (isOperation(ligne, variables) != 'F') {
+            printf("operation\n");
+            opVar(ligne, variables, isOperation(ligne, variables));
         } else {
             fprintf(output, "Ligne vide ou invalide\n");
         }
         texte = texte -> next;
         ligne = ligne -> next;
+        ligne = NULL;
     }
     // Quand on refait la boucle on arrive sur la ligne 2
-    afficherListe(ligne);
-    // afficherListe(texte);
+    // afficherTexte(ligne);
+    // afficherTexte(texte);
 }
 
 int main(int argc, char const *argv[]) {
     FILE* file1;
     FILE* file2;
     if (argc == 1) {
-        file1 = fopen(stdin, "r");
-        file2 = fopen(stdout, "a+");
+        file1 = stdin;
+        file2 = stdout;
     } else if (argc == 3) {
         if (strcmp(argv[1], "-i")==0) {
             file1 = fopen(argv[2], "r");
-            file2 = fopen(stdout, "a+");
+            file2 = stdout;
         } else if (strcmp(argv[1], "-o")) {
-            file1 = fopen(stdin, "r");
+            file1 = stdin;
             file2 = fopen(argv[2], "a+");
         } else goto error;
     } else if (argc == 5) {
@@ -337,6 +344,6 @@ int main(int argc, char const *argv[]) {
         perror("Argument error");
         return 1;
     }
-    readfile(file1, file2);
+    readFile(file1, file2);
     return 0;
 }
