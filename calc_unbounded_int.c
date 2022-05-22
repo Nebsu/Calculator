@@ -98,18 +98,13 @@ int isWord(const char *str) {
 // Fonctions qui détecte le type de la ligne (print, affectation ou opération) : 
 
 int isPrint(Texte ligne) {
-    if (ligne == NULL) return 0;
-    char *s1 = ligne->str;
     Mot *ptr = ligne;
     if (ptr == NULL) return 0;
     char *s1 = ptr->str;
     if (isWord(s1) == 0) return 0;
     if (strcmp(s1, "print") != 0) return 0;
-    ligne = ligne->next;
     ptr = ptr->next;
 
-    if (ligne == NULL) return 0;
-    char *s2 = ligne->str;
     if (ptr == NULL) return 0;
     char *s2 = ptr->str;
     if (isWord(s2) == 0) return 0;
@@ -117,74 +112,51 @@ int isPrint(Texte ligne) {
 }
 
 int isAffectation(Texte ligne) {
-    if (ligne == NULL) return 0;
-    char *s1 = ligne->str;
     Mot *ptr = ligne;
     if (ptr == NULL) return 0;
     char *s1 = ptr->str;
     if (isWord(s1) == 0) return 0;
-    ligne = ligne->next;
     ptr = ptr->next;
     
-    if (ligne == NULL) return 0;
-    char *s2 = ligne->str;
     if (ptr == NULL) return 0;
     char *s2 = ptr->str;
     if (strcmp(s2, "=") != 0) return 0;
-    ligne = ligne->next;
     ptr = ptr->next;
 
-    if (ligne == NULL) return 0;
-    char *s3 = ligne->str;
     if (ptr == NULL) return 0;
     char *s3 = ptr->str;
     if(is_int(s3) == 0 && isWord(s3) == 0) return 0;
-    ligne = ligne->next;
     ptr = ptr->next;
 
-    if (ligne == NULL) return 1;
     if (ptr == NULL) return 1;
     return 0;
 }
 
 char isOperation(Texte ligne) {
-    if (ligne == NULL) return 'F';
-    char *s1 = ligne->str;
     Mot *ptr = ligne;
     if (ptr == NULL) return 'F';
     char *s1 = ptr->str;
     if (isWord(s1) == 0) return 'F';
-    ligne = ligne->next;
-    if (ligne == NULL) return 'F';
-    char *s2 = ligne->str;
     ptr = ptr->next;
     if (ptr == NULL) return 'F';
     char *s2 = ptr->str;
     if (strcmp(s2, "=") != 0) return 'F';
-    ligne = ligne->next;
-    if (ligne == NULL) return 'F';
-    char *s3 = ligne->str;
     ptr = ptr->next;
     if (ptr == NULL) return 'F';
     char *s3 = ptr->str;
     // On doit avoir des nombres ou des variables :
     if (is_int(s3) == 0 && isWord(s3) == 0) return 'F';
-    ligne = ligne -> next;
-    if (ligne == NULL) return 'F';
-    char *s4 = ligne->str;
     ptr = ptr -> next;
     if (ptr == NULL) return 'F';
     char *s4 = ptr->str;
     if (strcmp(s4, "+") != 0 && strcmp(s4, "-") != 0 && strcmp(s4, "*") != 0) return 'F';
-    ligne = ligne->next;
-    if (ligne == NULL) return 'F';
-    char *s5 = ligne->str;
     ptr = ptr->next;
     if (ptr == NULL) return 'F';
     char *s5 = ptr->str;
     if (is_int(s5) == 0 && isWord(s5) == 0) return 'F';
     return s4[0];
 }
+
 
 // Fonctions qui effectue les procédures du fichier texte (print, affectation ou opération) :
 
