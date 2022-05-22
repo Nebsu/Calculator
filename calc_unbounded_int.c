@@ -55,13 +55,12 @@ int isPrint(Texte ligne) {
     Mot *ptr = ligne;
     if (ptr == NULL) return 0;
     char *s1 = ptr->str;
-    if (isWord(s1) == 0) return 0;
     if (strcmp(s1, "print") != 0) return 0;
     ptr = ptr->next;
 
     if (ptr == NULL) return 0;
     char *s2 = ptr->str;
-    if (isWord(s2) == 0) return 0;
+    if (isalpha(s2[0]) == 0) return 0;
     return 1;
 }
 
@@ -69,7 +68,7 @@ int isAffectation(Texte ligne) {
     Mot *ptr = ligne;
     if (ptr == NULL) return 0;
     char *s1 = ptr->str;
-    if (isWord(s1) == 0) return 0;
+    if (isalpha(s1[0]) == 0) return 0;
     ptr = ptr->next;
     
     if (ptr == NULL) return 0;
@@ -79,7 +78,7 @@ int isAffectation(Texte ligne) {
 
     if (ptr == NULL) return 0;
     char *s3 = ptr->str;
-    if(is_int(s3) == 0 && isWord(s3) == 0) return 0;
+    if(is_int(s3) == 0 && isalpha(s3[0]) == 0) return 0;
     ptr = ptr->next;
 
     if (ptr == NULL) return 1;
@@ -90,7 +89,7 @@ char isOperation(Texte ligne) {
     Mot *ptr = ligne;
     if (ptr == NULL) return 'F';
     char *s1 = ptr->str;
-    if (isWord(s1) == 0) return 'F';
+    if (isalpha(s1[0]) == 0) return 'F';
     ptr = ptr->next;
     if (ptr == NULL) return 'F';
     char *s2 = ptr->str;
@@ -99,7 +98,7 @@ char isOperation(Texte ligne) {
     if (ptr == NULL) return 'F';
     char *s3 = ptr->str;
     // On doit avoir des nombres ou des variables :
-    if (is_int(s3) == 0 && isWord(s3) == 0) return 'F';
+    if (is_int(s3) == 0 && isalpha(s3[0]) == 0) return 'F';
     ptr = ptr -> next;
     if (ptr == NULL) return 'F';
     char *s4 = ptr->str;
@@ -107,7 +106,7 @@ char isOperation(Texte ligne) {
     ptr = ptr->next;
     if (ptr == NULL) return 'F';
     char *s5 = ptr->str;
-    if (is_int(s5) == 0 && isWord(s5) == 0) return 'F';
+    if (is_int(s5) == 0 && isalpha(s5[0]) == 0) return 'F';
     return s4[0];
 }
 
@@ -189,23 +188,25 @@ void readFile(FILE *input, FILE *output) {
     Texte texte = NULL;
     unbounded_int *variables = malloc(MAX_VAR_NUMBER * sizeof(unbounded_int));
     assert (variables != NULL);
+    for(int i = 0; i < 26; i++){
+        variables[i] = init_result(1);
+    }
     int i = 0;
     int a = 0, b = 0;
-    char *c = malloc(sizeof(char) * MAX_LENGTH);
+    char *c = malloc(sizeof(char));
     // Ajoute toutes les lignes dans le texte
     while((i = fgetc(input))!= EOF) {
-        if(a == 0 && i != ' '){
-            c[b] = i;
-            b++;
-        }else{
-            if(a == 0) texte = ajouterFin(texte, c);
+        if(i != ' ' && a != 0){
             if( i == '\n') texte = ajouterFin(texte, "\n");
-            char *mot = malloc(sizeof(char)*MAX_LENGTH);
+            char *mot = malloc(sizeof(char));
             assert(mot != NULL);
             fscanf(input, "%s", mot);
             texte = ajouterFin(texte, mot);
-            b = 1;
-            a++;
+        }else{
+            c[0] = i;
+            c[1] = '\0';
+            a = 1;
+            texte = ajouterFin(texte, c);
         }
     }
     Texte ligne;
@@ -216,7 +217,7 @@ void readFile(FILE *input, FILE *output) {
             ligne = ajouterFin(ligne, texte -> str);
             texte = texte -> next;
         }
-        // afficherTexte(ligne);
+        afficherTexte(ligne);
         // Traitement de la ligne :
         if (isPrint(ligne) == 1) {
             printVar(output, ligne, variables);
